@@ -86,13 +86,29 @@ public class LoginActivity extends AppCompatActivity {
                         mAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
+                                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
                                 if (!task.isSuccessful()){
                                     Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
                                             Toast.LENGTH_SHORT).show();
                                     mProgressBar.setVisibility(View.GONE);
                                     mPleaseWait.setVisibility(View.GONE);
                                 }else {
-                                    Log.d(TAG, "signInWithEmail: successful login");
+                                    try {
+                                        if (user.isEmailVerified()){
+                                            Intent intent= new Intent(getApplicationContext(),HomeActivity.class);
+                                            startActivity(intent);
+
+                                        }else {
+                                            Toast.makeText(mContext, "Email is not verified..Please check your email", Toast.LENGTH_SHORT).show();
+                                            mProgressBar.setVisibility(View.GONE);
+                                            mPleaseWait.setVisibility(View.GONE);
+                                            mAuth.signOut();
+                                        }
+
+                                    }catch (NullPointerException ex){
+                                        Log.d(TAG, "onComplete: NullPointerException: " + ex.getMessage());
+                                    } Log.d(TAG, "signInWithEmail: successful login");
                                     Toast.makeText(LoginActivity.this, getString(R.string.auth_success),
                                             Toast.LENGTH_SHORT).show();
                                     mProgressBar.setVisibility(View.GONE);
